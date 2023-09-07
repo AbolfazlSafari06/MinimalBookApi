@@ -1,5 +1,7 @@
-﻿using MinimalBookApi.Data;
+﻿using FluentValidation;
+using MinimalBookApi.Data;
 using MinimalBookApi.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace MinimalBookApi.Endpoints;
 
@@ -11,8 +13,14 @@ public static class ToDoEndpoint
     {
         app.MapGet("/", () => TypedResults.Ok(_context.Todos.Select(Todo.TodoToDto).ToList())).WithName("TEst");
 
-        app.MapPost("/", (CreateTodoDto command) =>
+        app.MapPost("/", async (IValidator<CreateTodoDto> validator, CreateTodoDto command) =>
         {
+            var valid = await validator.ValidateAsync(command);
+            if (!valid.IsValid)
+            {
+                return Results.ValidationProblem(valid.ToDictionary());
+            }
+
             if (command is null)
             {
                 return Results.BadRequest("درخواست اشتباه است");
@@ -52,8 +60,15 @@ public static class ToDoEndpoint
             return TypedResults.Ok();
         });
 
-        app.MapPut("/", (UpdateTodoDto command) =>
+        app.MapPut("/", async (IValidator <UpdateTodoDto> validator,UpdateTodoDto command) =>
         {
+            var valid = await validator.ValidateAsync(command);
+            if (!valid.IsValid)
+            {
+                return Results.ValidationProblem(valid.ToDictionary());
+            }
+
+
             var todo = _context.GetById(command.Id);
 
             if (todo is null)

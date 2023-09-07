@@ -1,7 +1,11 @@
-using MinimalBookApi.Endpoints;
+using MinimalBookApi.Endpoints; 
+using FluentValidation;
+using MinimalBookApi.Validator;
+using MinimalBookApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddValidatorsFromAssemblyContaining(typeof(CreateTodoDto));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -14,4 +18,5 @@ app.UseHttpsRedirection();
 app.MapGroup("/todos")
     .WithTags("todos") 
     .TodoEndpoints();
+
 app.Run();
